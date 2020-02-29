@@ -1,5 +1,5 @@
 from gym_env import DinoEnv
-from agent import QLearningAgent
+from agent import *
 
 # dinoEnv = DinoEnv(render=True)
 
@@ -17,21 +17,40 @@ from agent import QLearningAgent
 
 #     # print(dinoEnv.get_score())
 #     i += 1
+agent = None
 
 def qlearning():
+    global agent
     agent = QLearningAgent(DinoEnv(render=True))
 
     parameters = {
-        'lr': 0.8,
-        'gamma': 0.8,
+        'lr': 0.7,
+        'gamma': 0.9,
         'max_epsilon': 0.8,
         'min_epsilon': 0.01,
         'decay_rate': 0.005
     }
 
-    agent.train(50, parameters)
+    agent.train(200, parameters)
+    agent.print_infos()
+    agent.run(5)
+
+def sarsa():
+    global agent
+    agent = SarsaAgent(DinoEnv(render=True))
+
+    parameters = {
+        'lr': 0.7,
+        'gamma': 0.9,
+        'max_epsilon': 0.5,
+        'min_epsilon': 0.01,
+        'decay_rate': 0.0005
+    }
+
+    agent.train(20, parameters)
     agent.print_infos()
     agent.run(5)
 
 if  __name__ == "__main__":
-    qlearning()
+    # qlearning()
+    sarsa()

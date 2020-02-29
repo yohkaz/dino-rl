@@ -85,7 +85,7 @@ class DinoEnv(gym.Env):
             self.game.press_down()
         if action == 3:
             self.game.press_space()
-        observation = self._observe()
+        observation = int((self._observe() + self._observe() + self._observe() + self._observe()) / 4)
         reward = self.gametime_reward
         done = False
         info = {}

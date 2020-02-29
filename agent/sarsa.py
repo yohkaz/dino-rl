@@ -1,7 +1,7 @@
 import numpy as np
 import random
 
-class QLearningAgent:
+class SarsaAgent:
     def __init__(self, env):
         self.env = env
         self.qtable = np.zeros((env.observation_space.n, env.action_space.n))
@@ -34,23 +34,23 @@ class QLearningAgent:
             done = False
             total_rewards = 0
 
+            action = self.choose_action(state, epsilon)
             while True:
-                # print(state, "", end='', flush=True)
-                action = self.choose_action(state, epsilon)
-
-                # print("action:", self.env.get_action_meanings()[action], "", end="", flush=True)
                 print("action:", self.env.get_action_meanings()[action])
+
                 # Take the action (a) and observe the outcome state(s') and reward (r)
                 new_state, reward, done, info = self.env.step(action)
+                next_action = self.choose_action(new_state, epsilon)
 
-                # Update Q(s,a):= Q(s,a) + lr [R(s,a) + gamma * max Q(s',a') - Q(s,a)]
+                # Update Q(s,a):= Q(s,a) + lr [R(s,a) + gamma * Q(s',a') - Q(s,a)]
                 # qtable[new_state,:] : all the actions we can take from new state
-                self.qtable[state, action] = self.qtable[state, action] + parameters['lr'] * (reward + parameters['gamma'] * np.max(self.qtable[new_state, :]) - self.qtable[state, action])
+                self.qtable[state, action] = self.qtable[state, action] + parameters['lr'] * (reward + parameters['gamma'] * self.qtable[new_state, next_action] - self.qtable[state, action])
 
                 total_rewards += reward
 
                 # Our new state is state
                 state = new_state
+                action = next_action
 
                 # If done (if we're dead) : finish episode
                 if done == True: 
