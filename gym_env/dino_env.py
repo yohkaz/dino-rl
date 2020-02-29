@@ -59,9 +59,6 @@ class DinoEnv(gym.Env):
         s = self.game.get_canvas()
         b = io.BytesIO(base64.b64decode(s))
         i = Image.open(b)
-        # i.crop()
-        # for ...
-        #     i.getpixel()
 
         # RGBa to RGB, needed ?
         bg = Image.new("RGB", i.size, (255, 255, 255))  # fill background as white color
@@ -85,7 +82,8 @@ class DinoEnv(gym.Env):
             self.game.press_down()
         if action == 3:
             self.game.press_space()
-        observation = int((self._observe() + self._observe() + self._observe() + self._observe()) / 4)
+        # observation = int((self._observe() + self._observe() + self._observe() + self._observe()) / 4)
+        observation = self._observe()
         reward = self.gametime_reward
         done = False
         info = {}

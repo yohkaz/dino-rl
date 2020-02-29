@@ -25,6 +25,7 @@ class QLearningAgent:
 
         epsilon = parameters['max_epsilon']
         for episode in range(n_episodes):
+            print("****************************************************")
             print("TRAIN EPISODE", episode)
             print("epsilon:", epsilon)
 
@@ -81,6 +82,10 @@ class QLearningAgent:
                     print("Score:", self.env.get_score())
                     break
                 state = new_state
+
+    def reset(self):
+        self.env.__init__()
+        self.qtable = np.zeros((self.env.observation_space.n, self.env.action_space.n))
 
     def print_infos(self):
         print("Reward:")

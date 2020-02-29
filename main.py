@@ -18,9 +18,11 @@ from agent import *
 #     # print(dinoEnv.get_score())
 #     i += 1
 agent = None
+parameters = None
 
 def qlearning():
     global agent
+    global parameters
     agent = QLearningAgent(DinoEnv(render=True))
 
     parameters = {
@@ -37,6 +39,7 @@ def qlearning():
 
 def sarsa():
     global agent
+    global parameters
     agent = SarsaAgent(DinoEnv(render=True))
 
     parameters = {
@@ -47,9 +50,9 @@ def sarsa():
         'decay_rate': 0.0005
     }
 
-    agent.train(20, parameters)
-    agent.print_infos()
-    agent.run(5)
+    agent.train(200, parameters)
+    # agent.print_infos()
+    # agent.run(5)
 
 if  __name__ == "__main__":
     # qlearning()

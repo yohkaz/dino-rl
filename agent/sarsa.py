@@ -25,6 +25,7 @@ class SarsaAgent:
 
         epsilon = parameters['max_epsilon']
         for episode in range(n_episodes):
+            print("****************************************************")
             print("TRAIN EPISODE", episode)
             print("epsilon:", epsilon)
 
@@ -36,7 +37,8 @@ class SarsaAgent:
 
             action = self.choose_action(state, epsilon)
             while True:
-                print("action:", self.env.get_action_meanings()[action])
+                # print("action:", self.env.get_action_meanings()[action])
+                print(self.env.get_action_meanings()[action], end=" ", flush=True)
 
                 # Take the action (a) and observe the outcome state(s') and reward (r)
                 new_state, reward, done, info = self.env.step(action)
@@ -81,6 +83,10 @@ class SarsaAgent:
                     print("Score:", self.env.get_score())
                     break
                 state = new_state
+
+    def reset(self):
+        self.env.__init__()
+        self.qtable = np.zeros((self.env.observation_space.n, self.env.action_space.n))
 
     def print_infos(self):
         print("Reward:")
