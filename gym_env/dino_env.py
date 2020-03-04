@@ -28,28 +28,30 @@ class DinoEnv(gym.Env):
         # self.current_frame = self.observation_space.low
         self._action_set = [0, 1, 2]
 
-    def process_img(self, img):
+    def manually_process_img(self, img, display=False):
         width, height = img.size
 
         # Remove the character, ground, and score txt
-        (left, upper, right, lower) = (42, 22, width, height-18)
+        (left, upper, right, lower) = (48, 22, width, height-18)
         img = img.crop((left, upper, right, lower))
 
         # Find first obstacle
         n_level = 20
         state = {'dist_obstacle': n_level}
         width, height = img.size
-        # obstacle = False
+        obstacle = False
         for i in range(width):
             coord = (i, height-20)
             if img.getpixel(coord) != (255, 255, 255):
-                # img.putpixel(coord, (255, 0, 0))
-                # obstacle = True
-                state['dist_obstacle'] = int(((i - (i % 10)) * n_level) / (width - (width % 10)))
+                img.putpixel(coord, (255, 0, 0))
+                if not obstacle:
+                    state['dist_obstacle'] = int(((i - (i % 10)) * n_level) / (img.size[0] - (img.size[0] % 10)))
+                obstacle = True
                 break
 
-        # if obstacle:
-        #     print(state)
+        if display:
+            print(state)
+            img.show()
 
         # return state
         return state['dist_obstacle']
@@ -65,10 +67,18 @@ class DinoEnv(gym.Env):
         bg.paste(i, mask=i.split()[3])  # 3 is the alpha channel
         i = bg
 
-        state = self.process_img(i.copy())
+        state = self.manually_process_img(i.copy())
+        # print(state)
+        # try:
+        #     if (self.manually_process_img(self.current_frame) != 0 and state == 0):
+        #         # self.process_img(self.current_frame, True)
+        #         self.manually_process_img(i, True)
+        # except:
+        #     print()
 
         a = np.array(i)
-        self.current_frame = a
+        self.current_frame = i
+        # self.current_frame = a
         # return self.current_frame
         return state
 

@@ -19,6 +19,7 @@ class DinoGame:
         self.browser = webdriver.Chrome(executable_path="chromedriver/chromedriver.exe", options=options)
         print("     Opening \'chrome://dino\'")
         self.browser.get("chrome://dino")
+        print()
 
     def get_parameters(self):
         params = {}
