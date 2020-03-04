@@ -50,5 +50,6 @@ def sarsa():
     # agent.run(5)
 
 if  __name__ == "__main__":
+    # run with 'python -i main.py' to interact with the agent in the command line
     # qlearning()
     sarsa()

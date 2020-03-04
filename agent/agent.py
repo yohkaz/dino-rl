@@ -1,6 +1,5 @@
 import numpy as np
 import random
-from agent.utils import *
 
 # Action modes
 EPSILON = "EPSILON"
