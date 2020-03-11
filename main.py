@@ -5,51 +5,27 @@ from agent.agent import EPSILON, SOFTMAX
 agent = None
 parameters = None
 
-def qlearning():
+def main():
     global agent
     global parameters
-    agent = QLearningAgent(DinoEnv(render=True))
 
-    # parameters = {
-    #     'lr': 0.7,
-    #     'gamma': 0.9,
-    #     'max_epsilon': 0.5,
-    #     'min_epsilon': 0.01,
-    #     'decay_rate': 0.0
-    # }
+    # agent = QLearningAgent(DinoEnv(accelerate=True), FrameProcessor(simplified=True))
+    agent = SarsaAgent(DinoEnv(simplified_state=True, accelerate=True))
 
     parameters = {
-        'mode': EPSILON,
-        'init_epsilon': 0.5,
+        'policy': EPSILON,
+        'epsilon': 0.5,
         'epsilon_decay': 0.999,
-        'lr': 0.7,
-        'gamma': 0.9,
-    }
-
-    # agent.train(100, parameters)
-    # agent.print_infos()
-    # agent.run(5)
-
-def sarsa():
-    global agent
-    global parameters
-    agent = SarsaAgent(DinoEnv(render=True))
-
-    parameters = {
-        'mode': EPSILON,
-        'init_epsilon': 0.5,
-        'epsilon_decay': 0.999,
-        'lr': 0.7,
-        'gamma': 0.9,
+        'tau': 1,
+        'tau_inc': 0.001,
+        # 'lr': 0.15,
+        'lr': 0.05,
+        'gamma': 0.95,
+        # 'gamma': 0.4,
     }
 
     agent.set_parameters(parameters)
-    # agent.train(400, parameters)
-    # agent.train(1, parameters)
-    # agent.print_infos()
-    # agent.run(5)
 
 if  __name__ == "__main__":
     # run with 'python -i main.py' to interact with the agent in the command line
-    # qlearning()
-    sarsa()
+    main()

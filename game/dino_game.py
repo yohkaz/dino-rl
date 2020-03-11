@@ -3,7 +3,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 
 class DinoGame:
-    def __init__(self, render):
+    def __init__(self, accelerate=True):
         print("DinoGame/__init__")
 
         # Define options
@@ -11,8 +11,6 @@ class DinoGame:
         options.add_argument("--disable-infobars")
         options.add_argument("--mute-audio")
         options.add_argument('--no-sandbox')
-        if not render:
-            options.add_argument("--headless")
 
         # Open browser and the game
         print("     Running chrome")
@@ -20,6 +18,8 @@ class DinoGame:
         print("     Opening \'chrome://dino\'")
         self.browser.get("chrome://dino")
         print()
+        if accelerate:
+            self.set_parameter('config.ACCELERATION', 0)
 
     def get_parameters(self):
         params = {}

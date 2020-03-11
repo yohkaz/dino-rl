@@ -2,7 +2,6 @@ import base64
 import io
 import numpy as np
 import os
-from collections import deque
 from PIL import Image               # Load images
 
 import gym
@@ -10,54 +9,28 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 
 from game import DinoGame
+from gym_env.frame_processor import FrameProcessor
 
 class DinoEnv(gym.Env):
     metadata = {'render.modes': ['rgb_array'], 'video.frames_per_second': 10}
 
-    def __init__(self, simplified_state=True, render=True, accelerate=True):
-        self.game = DinoGame(render)
+    def __init__(self, simplified_state=True, accelerate=True):
+        self.game = DinoGame(accelerate)
+        self.frame_processor = FrameProcessor(simplified=simplified_state)
 
-        # image_size = self._observe().shape
-        # self.observation_space = spaces.Box(low=0, high=255, shape=(150, 600, 3), dtype=np.uint8)
-
+        # Set env parameters
+        self.accelerate = accelerate
         if simplified_state:
-            self.observation_space = spaces.Discrete(21)
+            self.observation_space = spaces.Box(low=np.array([0, 0]),
+                                                high=np.array([self.frame_processor.dimensions()[0],
+                                                               self.frame_processor.dimensions()[1]]),
+                                                               dtype=np.int)
         self.action_space = spaces.Discrete(3)
-        self.gametime_reward = 0.1
-        self.gameover_penalty = -1
-        # self.current_frame = self.observation_space.low
+        self.gametime_reward = 1
+        self.gameover_penalty = -20
         self._action_set = [0, 1, 2]
 
-    def manually_process_img(self, img, display=False):
-        width, height = img.size
-
-        # Remove the character, ground, and score txt
-        (left, upper, right, lower) = (48, 22, width, height-18)
-        img = img.crop((left, upper, right, lower))
-
-        # Find first obstacle
-        n_level = 20
-        state = {'dist_obstacle': n_level}
-        width, height = img.size
-        obstacle = False
-        for i in range(width):
-            coord = (i, height-20)
-            if img.getpixel(coord) != (255, 255, 255):
-                img.putpixel(coord, (255, 0, 0))
-                if not obstacle:
-                    state['dist_obstacle'] = int(((i - (i % 10)) * n_level) / (img.size[0] - (img.size[0] % 10)))
-                obstacle = True
-                break
-
-        if display:
-            print(state)
-            img.show()
-
-        # return state
-        return state['dist_obstacle']
-
     def _observe(self):
-        # TODO: define state as intended
         s = self.game.get_canvas()
         b = io.BytesIO(base64.b64decode(s))
         i = Image.open(b)
@@ -67,34 +40,28 @@ class DinoEnv(gym.Env):
         bg.paste(i, mask=i.split()[3])  # 3 is the alpha channel
         i = bg
 
-        state = self.manually_process_img(i.copy())
-        # print(state)
-        # try:
-        #     if (self.manually_process_img(self.current_frame) != 0 and state == 0):
-        #         # self.process_img(self.current_frame, True)
-        #         self.manually_process_img(i, True)
-        # except:
-        #     print()
-
-        a = np.array(i)
-        self.current_frame = i
+        # a = np.array(i)
         # self.current_frame = a
         # return self.current_frame
-        return state
+        self.current_frame = i
+        return self.frame_processor.process(self.current_frame)
 
     def resume(self):
         self.game.resume()
 
     def step(self, action):
+        reward = 0
         if action == 1:
             self.game.press_up()
+            reward = -3
         if action == 2:
             self.game.press_down()
+            reward = -3
         if action == 3:
             self.game.press_space()
-        # observation = int((self._observe() + self._observe() + self._observe() + self._observe()) / 4)
+
         observation = self._observe()
-        reward = self.gametime_reward
+        reward = reward + self.gametime_reward
         done = False
         info = {}
         if self.game.is_crashed():
@@ -109,6 +76,9 @@ class DinoEnv(gym.Env):
         self.game.restart()
         return self._observe()
 
+    def relaunch_game(self):
+        self.game = DinoGame(self.accelerate)
+
     def render(self):
         s = self.game.get_canvas()
         b = io.BytesIO(base64.b64decode(s))
@@ -119,11 +89,14 @@ class DinoEnv(gym.Env):
         bg.paste(i, mask=i.split()[3])  # 3 is the alpha channel
         bg.show()
 
+    def show_current_frame(self):
+        self.current_frame.show()
+        return self.current_frame
+
     def close(self):
         self.game.close()
 
     def get_score(self):
-        # print(self.game.is_playing())
         return self.game.get_score()
 
     def set_acceleration(self, enable):
