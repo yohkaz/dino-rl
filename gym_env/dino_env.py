@@ -35,14 +35,11 @@ class DinoEnv(gym.Env):
         b = io.BytesIO(base64.b64decode(s))
         i = Image.open(b)
 
-        # RGBa to RGB, needed ?
+        # RGBa to RGB
         bg = Image.new("RGB", i.size, (255, 255, 255))  # fill background as white color
         bg.paste(i, mask=i.split()[3])  # 3 is the alpha channel
         i = bg
 
-        # a = np.array(i)
-        # self.current_frame = a
-        # return self.current_frame
         self.current_frame = i
         return self.frame_processor.process(self.current_frame)
 
@@ -53,10 +50,10 @@ class DinoEnv(gym.Env):
         reward = 0
         if action == 1:
             self.game.press_up()
-            reward = -3
+            reward = -1
         if action == 2:
             self.game.press_down()
-            reward = -3
+            reward = -1
         if action == 3:
             self.game.press_space()
 

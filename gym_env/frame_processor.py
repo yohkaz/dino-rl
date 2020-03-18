@@ -10,7 +10,7 @@ class FrameProcessor():
             self.init_deep()
 
     def init_simplified(self):
-        self.height_levels = 5
+        self.height_levels = 4
         self.obstacle_levels = 20
 
     def simplified_processing(self, frame, display=False):
@@ -38,7 +38,6 @@ class FrameProcessor():
 
         # Crop out the obstacles, ground, and score txt
         width, height = frame.size
-        # (left, upper, right, lower) = (0, 22, 48, height)
         (left, upper, right, lower) = (0, 32, 48, height)
         img_character = frame.crop((left, upper, right, lower))
         # Find height of the character
@@ -51,8 +50,8 @@ class FrameProcessor():
                 if display:
                     img_character.putpixel(coord, (255, 0, 0))
                 if not character:
-                    state['height'] = int((i * self.height_levels) / height)
-                    state['height'] = self.height_levels - state['height']
+                    state['height'] = int((i * (self.height_levels + 1)) / height)
+                    state['height'] = (self.height_levels + 1) - state['height']
                     state['height'] -= 2
                     character = True
                 break
@@ -65,14 +64,33 @@ class FrameProcessor():
         return (state['height'], state['dist_obstacle'])
 
     def init_deep(self):
-        # TODO: to implement!
         return 0
 
     def deep_processing(self, frame):
-        # TODO: to implement!
-        return 0
+        # Crop out useless elements (score, trees very far...)
+        width, height = frame.size                      # 600x150
+        (left, upper, right, lower) = (0, 32, width-200, height-8)
+        frame = frame.crop((left, upper, right, lower)) # 400x110
+
+        # Clear from clouds etc..
+        width, height = frame.size
+        for j in range(height):
+            for i in range(width):
+                coord = (i, j)
+                pixel = frame.getpixel(coord)
+                if pixel[0] >= 186 and pixel[0] <= 237:
+                    frame.putpixel(coord, (255, 255, 255))
+
+        # Resize the frame
+        frame = frame.resize((80, 80)).convert('L')     # 80x80
+        # frame = frame.resize((100, 80)).convert('L')    # 100x80
+        # frame = frame.resize((100, 80))                 # 100x80
+        np_frame = np.array(frame).astype(np.float32)   # (width, height)=100x80 x3(RGB)
+
+        return np_frame
 
     def process(self, frame):
+        self.deep_processing(frame)
         if self.simplified:
             return self.simplified_processing(frame)
         else:
@@ -84,4 +102,4 @@ class FrameProcessor():
 
     def dimensions(self):
         if self.simplified:
-            return (self.height_levels-1, self.obstacle_levels+1)
+            return (self.height_levels, self.obstacle_levels+1)

@@ -18,7 +18,7 @@ class DinoGame:
         print("     Opening \'chrome://dino\'")
         self.browser.get("chrome://dino")
         print()
-        if accelerate:
+        if not accelerate:
             self.set_parameter('config.ACCELERATION', 0)
 
     def get_parameters(self):
